@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #1c0f33;
+  --foreground: #ffffff;
+  --text-primary: #e2e8f0;
+  --text-secundary: #3b82f6;
+  --text-purple: #1c0f33;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: rgba(28, 15, 51, 0.95);
+    --foreground: #ffffff;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: sans-serif;
+}
+
+/* Clase para reutilizar estilos en enlaces de navegación */
+.nav-link {
+  color: var(--text-primary);
+  transition: color 0.3s ease-in-out;
+}
+
+.nav-link:hover {
+  color: var(--text-secundary);
+}
+
+/*Snippet to hidden the scrollbar*/
+.no-scroll-bar::webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /*hidden for IE and Edge*/
+  scrollbar-width: none; /*hidden for Firefox*/
+}
+
+/* globals.css */
+.text-glow-hover:hover {
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
