@@ -31,7 +31,7 @@ const TechNewsGrid: React.FC = () => {
       });
 
       const fetchedArticles = response.data.articles || [];
-      const formattedArticles = fetchedArticles.map((article: any) => ({
+      const formattedArticles = fetchedArticles.map((article: Article) => ({
         title: article.title || "No Title",
         url: article.url,
         urlToImage: article.urlToImage || "https://via.placeholder.com/150",
@@ -39,7 +39,7 @@ const TechNewsGrid: React.FC = () => {
 
       setArticles(formattedArticles);
       setLoading(false);
-    } catch (err: any) {
+    } catch {
       setError("Error fetching tech news. Please try again.");
       setLoading(false);
     }
@@ -64,7 +64,7 @@ const TechNewsGrid: React.FC = () => {
       id="technology"
       className="flex flex-col md:px-16 xs:px-2 pt-14 pb-28"
     >
-      <h3 className="font-title font-semibold text-3xl md:text-4xl xs:text-2xl md:px-0 pb-4 md:pb-8 xs:px-4">
+      <h3 className="font-title font-semibold text-3xl pt-14 md:text-4xl xs:text-2xl md:px-0 pb-4 md:pb-8 xs:px-4">
         Tech News
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-10 gap-20">

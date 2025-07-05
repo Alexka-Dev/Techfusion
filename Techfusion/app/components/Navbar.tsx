@@ -5,11 +5,11 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false); // Estado para controlar el menú desplegable
 
   return (
-    <nav className="bg-[#231240] fixed w-full h-14 z-20 top-0 sm:py-1">
-      <div className="w-full py-2 flex items-center justify-between sm:px-2">
-        <div className="flex items-center justify-center w-full space-x-2">
-          <img src="/TF-logo1.png" className="h-8" alt="Logo" />
-          <img src="/techfusion.png" className="h-6" alt="Techfusion" />
+    <nav className="bg-[#231240] fixed w-full h-20 z-20 top-0 sm:py-1">
+      <div className="w-full py-2 flex items-center sm:px-2">
+        <div className="flex items-center justify-center w-full space-x-2 py-2">
+          <img src="/TF-logo1.png" className="h-12" alt="Logo" />
+          <img src="/techfusion.png" className="h-12" alt="Techfusion" />
         </div>
 
         {/* Botón hamburguesa solo en pantallas pequeñas */}

@@ -33,7 +33,7 @@ const CryptoSlider: React.FC = () => {
     if (!scrollRef.current || data.length === 0) return;
 
     const scrollElement = scrollRef.current;
-    let scrollSpeed = 1; // Ajusta la velocidad del scroll
+    const scrollSpeed = 1; // Ajusta la velocidad del scroll
 
     const scroll = () => {
       scrollElement.scrollLeft += scrollSpeed;

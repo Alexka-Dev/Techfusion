@@ -120,9 +120,7 @@ const LatestNews: React.FC = () => {
       </div>
       {cryptoArticles.length + techArticles.length > visibleArticles.length && (
         <div className="text-left py-16 ">
-          <Button onClick={() => setVisibleCount((prev) => prev + 8)}>
-            See More...
-          </Button>
+          <Button>See More...</Button>
         </div>
       )}
     </section>

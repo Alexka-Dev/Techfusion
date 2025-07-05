@@ -76,7 +76,7 @@ const CryptoNewsGrid: React.FC = () => {
 
   return (
     <section id="crypto" className="flex flex-col md:p-16 xs:px-2 xs:pt-12">
-      <h3 className="font-title font-semibold text-3xl xs:text-2xl md:text-4xl pb-4  md:pb-8 md:px-0  xs:px-4">
+      <h3 className="font-title font-semibold text-3xl xs:text-2xl pt-14 md:text-4xl pb-4 md:pb-8 md:px-0 xs:px-4">
         Crypto News
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-10 gap-20">
