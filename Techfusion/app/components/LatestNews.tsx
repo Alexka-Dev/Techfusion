@@ -14,9 +14,8 @@ interface Article {
 const LatestNews: React.FC = () => {
   const [cryptoArticles, setCryptoArticles] = useState<Article[]>([]);
   const [techArticles, setTechArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [visibleCount, setVisibleCount] = useState(16); // Controlar cantidad visible
+  const [visibleCount, setVisibleCount] = useState(16);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,10 +52,12 @@ const LatestNews: React.FC = () => {
             category: "Technology",
           }))
         );
-        setLoading(false);
       } catch (error) {
-        setError("Error fetching news.");
-        setLoading(false);
+        const errMsg =
+          axios.isAxiosError(error) && error.response
+            ? `Error ${error.response.status}: ${error.response.statusText}`
+            : "Error fetching news.";
+        setError(errMsg);
       }
     };
 
@@ -120,7 +121,9 @@ const LatestNews: React.FC = () => {
       </div>
       {cryptoArticles.length + techArticles.length > visibleArticles.length && (
         <div className="text-left py-16 ">
-          <Button>See More...</Button>
+          <Button onClick={() => setVisibleCount((prev) => prev + 8)}>
+            See More...
+          </Button>
         </div>
       )}
     </section>
