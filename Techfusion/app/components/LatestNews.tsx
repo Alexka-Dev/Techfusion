@@ -1,79 +1,109 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
-import Button from "./Button";
+import Button from "./Button"; // Asegúrate de que esta ruta sea correcta
 
+// Importamos la función unificada de NewsData.io
+import { fetchNewsFromNewsDataAPI } from "./NewsApi";
+
+// Interfaz para un artículo genérico en LatestNews
+// Debe ser compatible con los campos que obtendrás de NewsData.io y los que usarás en el renderizado
 interface Article {
   title: string;
   url: string;
-  urlToImage: string;
-  category: string;
+  // Usamos 'string | null | undefined' ya que la imagen puede no estar siempre presente
+  urlToImage: string | null | undefined;
+  category: string; // "Crypto" o "Technology"
 }
 
 const LatestNews: React.FC = () => {
   const [cryptoArticles, setCryptoArticles] = useState<Article[]>([]);
   const [techArticles, setTechArticles] = useState<Article[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [visibleCount, setVisibleCount] = useState(16);
+  const [visibleCount, setVisibleCount] = useState(16); // Cantidad de artículos visibles
   const router = useRouter();
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const [cryptoRes, techRes] = await Promise.all([
-          axios.get("https://newsapi.org/v2/everything", {
-            params: {
-              q: "crypto OR blockchain",
-              sortBy: "publishedAt",
-              language: "en",
-              apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
-            },
-          }),
-          axios.get("https://newsapi.org/v2/top-headlines", {
-            params: {
-              category: "technology",
-              sortBy: "publishedAt",
-              language: "en",
-              apiKey: process.env.NEXT_PUBLIC_NEWS_API_KEY,
-            },
-          }),
+        // --- Verificación de la API Key de NewsData.io ---
+        // Ahora solo necesitamos la clave de NewsData.io
+        const newsdataApiKey = process.env.NEXT_PUBLIC_NEWSDATA_API_KEY;
+        if (!newsdataApiKey) {
+          throw new Error(
+            "Falta la clave API de NewsData.io. Revisa tu archivo .env.local y las variables de entorno de Vercel."
+          );
+        }
+
+        // --- Llamadas a la API de NewsData.io para ambas categorías ---
+        const [cryptoData, techData] = await Promise.all([
+          // Para Crypto, usamos fetchNewsFromNewsDataAPI con la categoría "cryptocurrency"
+          fetchNewsFromNewsDataAPI("cryptocurrency"),
+          // Para Tecnología, usamos fetchNewsFromNewsDataAPI con la categoría "technology"
+          fetchNewsFromNewsDataAPI("technology"),
         ]);
 
+        // --- Procesamiento y Mapeo de Artículos de Crypto (NewsData.io) ---
         setCryptoArticles(
-          (cryptoRes.data.articles || []).map((a: Article) => ({
-            ...a,
-            category: "Crypto",
-          }))
+          (cryptoData || [])
+            .filter((article) => article.title && article.link) // NewsData.io usa 'link'
+            .map((a) => ({
+              title: a.title,
+              url: a.link, // Mapeado de 'link' a 'url'
+              urlToImage: a.image_url || "https://via.placeholder.com/150", // Mapeado de 'image_url' a 'urlToImage'
+              category: "Crypto",
+            }))
         );
+
+        // --- Procesamiento y Mapeo de Artículos de Tecnología (NewsData.io) ---
         setTechArticles(
-          (techRes.data.articles || []).map((a: Article) => ({
-            ...a,
-            category: "Technology",
-          }))
+          (techData || [])
+            .filter((article) => article.title && article.link) // NewsData.io usa 'link'
+            .map((a) => ({
+              title: a.title,
+              url: a.link, // Mapeado de 'link' a 'url'
+              urlToImage: a.image_url || "https://via.placeholder.com/150", // Mapeado de 'image_url' a 'urlToImage'
+              category: "Technology",
+            }))
         );
-      } catch (error) {
+      } catch (err: any) {
+        console.error("Error al obtener las últimas noticias:", err);
         const errMsg =
-          axios.isAxiosError(error) && error.response
-            ? `Error ${error.response.status}: ${error.response.statusText}`
-            : "Error fetching news.";
+          err.message ||
+          "Error al obtener las noticias. Por favor, inténtalo de nuevo.";
         setError(errMsg);
       }
     };
 
     fetchNews();
-  }, []);
+  }, []); // Dependencias vacías para que se ejecute una sola vez al montar
 
   if (error) return <div className="text-red-500">{error}</div>;
 
+  // --- Lógica para mezclar artículos (se mantiene igual, pero opera sobre los nuevos datos) ---
   const mixArticles = (): Article[] => {
     const mixed: Article[] = [];
-    const blockCount = Math.floor(visibleCount / 8);
-    for (let i = 0; i < blockCount; i++) {
-      mixed.push(...cryptoArticles.slice(i * 4, i * 4 + 4));
-      mixed.push(...techArticles.slice(i * 4, i * 4 + 4));
+    // Calcula el número máximo de "bloques" que podemos formar con los artículos disponibles
+    const maxArticlesPerCategory = Math.max(
+      cryptoArticles.length,
+      techArticles.length
+    );
+    const totalBlocks = Math.ceil(maxArticlesPerCategory / 4); // Asumiendo 4 artículos por categoría por bloque
+
+    for (let i = 0; i < totalBlocks; i++) {
+      // Añade 4 artículos de Crypto si están disponibles
+      const cryptoSlice = cryptoArticles.slice(i * 4, i * 4 + 4);
+      if (cryptoSlice.length > 0) {
+        mixed.push(...cryptoSlice);
+      }
+      // Añade 4 artículos de Tecnología si están disponibles
+      const techSlice = techArticles.slice(i * 4, i * 4 + 4);
+      if (techSlice.length > 0) {
+        mixed.push(...techSlice);
+      }
     }
-    return mixed;
+    // Retorna solo la cantidad visible deseada
+    return mixed.slice(0, visibleCount);
   };
 
   const visibleArticles = mixArticles();
@@ -82,13 +112,12 @@ const LatestNews: React.FC = () => {
     <section
       id="latest"
       className="flex flex-col py-16 px-6 md:px-16 bg-gray-200 space-y-4 w-screen"
-      /*"w-screen -ml-[5vw] sm:-ml-[5rem]   bg-gray-200 px-6 md:px-16 pt-12 space-y-4"*/
     >
       <h2
         style={{ color: "var(--text-purple)" }}
         className="text-5xl font-extrabold pt-20 xs:pt-2 pb-10"
       >
-        Latest News
+        Últimas Noticias
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {visibleArticles.map((article, index) => (
@@ -100,8 +129,9 @@ const LatestNews: React.FC = () => {
           >
             {/* Imagen (70%) */}
             <div className="h-4/6 w-full">
+              {/* Usamos el fallback de placeholder si urlToImage es null o undefined */}
               <img
-                src={article.urlToImage}
+                src={article.urlToImage || "https://via.placeholder.com/150"}
                 alt={article.title}
                 className="w-full h-full object-cover rounded-md transition-transform duration-300 ease-in-out hover:scale-105"
               />
@@ -119,10 +149,11 @@ const LatestNews: React.FC = () => {
           </div>
         ))}
       </div>
+      {/* El botón "Ver Más" se mostrará si hay más artículos disponibles */}
       {cryptoArticles.length + techArticles.length > visibleArticles.length && (
         <div className="text-left py-16 ">
           <Button onClick={() => setVisibleCount((prev) => prev + 8)}>
-            See More...
+            Ver Más...
           </Button>
         </div>
       )}

@@ -1,7 +1,7 @@
 interface NewsCardProps {
   title: string;
   url: string;
-  urlToImage: string;
+  urlToImage: string | undefined;
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({ title, url, urlToImage }) => {
